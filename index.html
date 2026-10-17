@@ -1,0 +1,400 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lucchetto</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0e1116">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+  :root{
+    --bg:#0e1116;--panel:#161b22;--panel2:#1c2230;--line:#2a3342;
+    --text:#e6edf3;--muted:#9aa7b4;--accent:#2563eb;
+    --good:#2ea043;--warn:#d29922;--bad:#f85149;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);
+    font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;line-height:1.5;
+    padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}
+  header{padding:16px;border-bottom:1px solid var(--line);background:var(--panel)}
+  h1{font-size:17px;margin:0}
+  .sub{color:var(--muted);font-size:13px;margin-top:2px}
+  main{max-width:640px;margin:0 auto;padding:16px;display:grid;gap:14px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px}
+  .card h2{font-size:12px;margin:0 0 10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+  button{background:var(--accent);color:#fff;border:0;border-radius:10px;padding:12px 16px;
+    font-size:15px;font-weight:600;cursor:pointer}
+  button:hover{filter:brightness(1.08)}button:disabled{opacity:.4;cursor:not-allowed}
+  button.sec{background:var(--panel2);border:1px solid var(--line)}
+  button.sm{padding:9px 13px;font-size:14px}
+  button.link{background:none;border:0;color:var(--muted);font-weight:500;font-size:13px;padding:6px 2px;text-decoration:underline}
+  .big{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .big button{padding:22px 10px;font-size:18px}
+  .open{background:#1f6feb}.close{background:#8957e5}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .featrow{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;padding:8px 0;border-top:1px solid var(--line)}
+  .featrow:first-of-type{border-top:0}
+  .featrow .name{font-size:14px}.featrow .name small{display:block;color:var(--muted);font-size:12px}
+  input{background:var(--panel2);color:var(--text);border:1px solid var(--line);
+    border-radius:8px;padding:11px;font-size:16px;font-family:var(--mono);width:120px;letter-spacing:.15em;text-align:center}
+  input.w5{width:84px}
+  label{font-size:13px;color:var(--muted)}
+  .state{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;font-size:14px;align-items:center}
+  .state .k{color:var(--muted)}
+  .chip{display:inline-flex;align-items:center;gap:7px;font-weight:600}
+  .dot{width:11px;height:11px;border-radius:50%;background:var(--bad);flex:none}
+  .dot.on{background:var(--good)}.dot.warn{background:var(--warn)}
+  .lockbadge{font-weight:700;padding:3px 10px;border-radius:20px;font-size:13px}
+  .lk{background:rgba(248,81,73,.15);color:#ff9d96;border:1px solid rgba(248,81,73,.4)}
+  .ul{background:rgba(46,160,67,.15);color:#7ee787;border:1px solid rgba(46,160,67,.4)}
+  .unk{background:var(--panel2);color:var(--muted);border:1px solid var(--line)}
+  #log{font-family:var(--mono);font-size:11.5px;background:#0a0d12;border:1px solid var(--line);
+    border-radius:8px;padding:10px;height:200px;overflow:auto;white-space:pre-wrap}
+  .l-rx{color:#79c0ff}.l-tx{color:#d2a8ff}.l-sys{color:var(--muted)}.l-err{color:var(--bad)}.l-ok{color:#56d364}
+  .note{background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:10px 12px;font-size:13px;color:var(--muted)}
+  .note.warn{background:rgba(210,153,34,.1);border-color:rgba(210,153,34,.4)}
+  .note.ok{background:rgba(46,160,67,.1);border-color:rgba(46,160,67,.35)}
+  .note b{color:var(--text)}
+  details summary{cursor:pointer;color:var(--muted);font-size:13px}
+  details[open] summary{margin-bottom:10px}
+  .hidden{display:none}
+  .adv{display:grid;gap:8px;margin-top:8px}
+</style>
+</head>
+<body>
+<header>
+  <h1>🔐 Lucchetto valigia</h1>
+  <div class="sub">Controllo Bluetooth — modello YFZLCK2</div>
+</header>
+
+<main>
+  <div id="compat" class="note hidden"></div>
+
+  <div class="note ok">Collegando <b>non si apre niente</b>: la valigia si apre solo se premi 🔓 Apri.</div>
+
+  <div class="card">
+    <div class="row" style="margin-bottom:12px">
+      <label>Password (6 cifre)</label>
+      <input id="pwd" value="000000" maxlength="18" inputmode="numeric">
+    </div>
+    <div class="row">
+      <button id="btnConnect">Collega e autentica</button>
+      <button id="btnDisconnect" class="sec" disabled>Scollega</button>
+    </div>
+    <button id="btnOther" class="link hidden">Scegli un altro lucchetto</button>
+  </div>
+
+  <div class="card">
+    <h2>Stato</h2>
+    <div class="state">
+      <span class="k">Collegamento</span><span class="chip"><span id="dotConn" class="dot"></span><span id="txtConn">non collegato</span></span>
+      <span class="k">Autenticazione</span><span class="chip"><span id="dotAuth" class="dot"></span><span id="txtAuth">—</span></span>
+      <span class="k">Serratura</span><span><span id="lockBadge" class="lockbadge unk">sconosciuto</span></span>
+      <span class="k">Batteria</span><span id="txtBatt">—</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Comandi</h2>
+    <div class="big">
+      <button id="btnOpen" class="open needauth" disabled>🔓 Apri</button>
+      <button id="btnClose" class="close needauth" disabled>🔒 Chiudi</button>
+    </div>
+    <div class="note" style="margin-top:12px">
+      Alla prima prova tieni <b>le cerniere sganciate</b> dal lucchetto e la chiave TSA a portata.
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Altre funzioni</h2>
+    <div class="featrow">
+      <div class="name">🔔 Suoneria <small>fa suonare il lucchetto per ritrovarlo</small></div>
+      <button class="sec sm needconn" data-act="ring" disabled>Suona</button>
+      <button class="sec sm needconn" data-act="stopring" disabled>Stop</button>
+    </div>
+    <div class="featrow">
+      <div class="name">🔄 Blocco automatico <small>si chiude da solo quando ti allontani</small></div>
+      <button class="sec sm needauth" data-act="autolock_on" disabled>Attiva</button>
+      <button class="sec sm needauth" data-act="autolock_off" disabled>Disattiva</button>
+    </div>
+    <div class="featrow">
+      <div class="name">📢 Avviso di distanza <small>il lucchetto segnala se lo lasci indietro</small></div>
+      <button class="sec sm needauth" data-act="alert_on" disabled>Attiva</button>
+      <button class="sec sm needauth" data-act="alert_off" disabled>Disattiva</button>
+    </div>
+  </div>
+
+  <details class="card">
+    <summary>Funzioni avanzate (codice MOS e cambio password)</summary>
+    <div class="adv">
+      <div class="note warn"><b>Attenzione:</b> queste impostazioni restano nel lucchetto. Se dimentichi
+      il codice MOS o la nuova password dovrai ri-autenticarti con i valori che conosci. Annota sempre ciò che imposti.</div>
+      <div class="featrow">
+        <div class="name">🔢 Codice MOS <small>apri senza telefono · 4 cifre da 1 a 5 (= n° di click sul tasto)</small></div>
+        <input id="mos" class="w5" maxlength="4" inputmode="numeric" placeholder="1245">
+        <button class="sec sm needauth" data-act="mos_set" disabled>Imposta</button>
+      </div>
+      <div class="row" style="margin:-4px 0 4px">
+        <button class="sec sm needauth" data-act="mos_off" disabled>Disattiva codice MOS</button>
+      </div>
+      <div class="featrow" style="grid-template-columns:1fr">
+        <div class="name">🔑 Cambia password di connessione <small>6 caratteri — sostituisce quella attuale</small></div>
+      </div>
+      <div class="row">
+        <input id="newpwd" maxlength="6" inputmode="numeric" placeholder="nuova (6)">
+        <input id="newpwd2" maxlength="6" inputmode="numeric" placeholder="ripeti">
+        <button class="sec sm needauth" data-act="chpwd" disabled>Cambia</button>
+      </div>
+    </div>
+  </details>
+
+  <details class="card">
+    <summary>Registro tecnico</summary>
+    <div class="row" style="margin:10px 0">
+      <button class="sec sm needconn" data-act="batt" disabled>Leggi batteria</button>
+      <button class="sec sm needconn" data-act="reauth" disabled>Ri-autentica</button>
+    </div>
+    <div id="log"></div>
+    <div class="row" style="margin-top:8px">
+      <button class="sec sm" id="btnClear">Pulisci</button>
+      <button class="sec sm" id="btnExport">Esporta (.txt)</button>
+    </div>
+  </details>
+
+  <div class="note">
+    App installata: funziona <b>offline</b>, non serve internet per aprire il lucchetto. Tieni il
+    Bluetooth del telefono acceso e, se usi nRF Connect, chiudilo (un dispositivo per volta).
+  </div>
+</main>
+
+<script>
+/* ---- MD5 (blueimp, public domain) — verificato contro riferimento ---- */
+var MD5=(function(){
+ function sa(x,y){var l=(x&0xFFFF)+(y&0xFFFF);var m=(x>>16)+(y>>16)+(l>>16);return(m<<16)|(l&0xFFFF);}
+ function rol(n,c){return(n<<c)|(n>>>(32-c));}
+ function cmn(q,a,b,x,s,t){return sa(rol(sa(sa(a,q),sa(x,t)),s),b);}
+ function ff(a,b,c,d,x,s,t){return cmn((b&c)|((~b)&d),a,b,x,s,t);}
+ function gg(a,b,c,d,x,s,t){return cmn((b&d)|(c&(~d)),a,b,x,s,t);}
+ function hh(a,b,c,d,x,s,t){return cmn(b^c^d,a,b,x,s,t);}
+ function ii(a,b,c,d,x,s,t){return cmn(c^(b|(~d)),a,b,x,s,t);}
+ function core(x,len){x[len>>5]|=0x80<<(len%32);x[(((len+64)>>>9)<<4)+14]=len;
+  var a=1732584193,b=-271733879,c=-1732584194,d=271733878;
+  for(var i=0;i<x.length;i+=16){var oa=a,ob=b,oc=c,od=d;
+   a=ff(a,b,c,d,x[i],7,-680876936);d=ff(d,a,b,c,x[i+1],12,-389564586);c=ff(c,d,a,b,x[i+2],17,606105819);b=ff(b,c,d,a,x[i+3],22,-1044525330);
+   a=ff(a,b,c,d,x[i+4],7,-176418897);d=ff(d,a,b,c,x[i+5],12,1200080426);c=ff(c,d,a,b,x[i+6],17,-1473231341);b=ff(b,c,d,a,x[i+7],22,-45705983);
+   a=ff(a,b,c,d,x[i+8],7,1770035416);d=ff(d,a,b,c,x[i+9],12,-1958414417);c=ff(c,d,a,b,x[i+10],17,-42063);b=ff(b,c,d,a,x[i+11],22,-1990404162);
+   a=ff(a,b,c,d,x[i+12],7,1804603682);d=ff(d,a,b,c,x[i+13],12,-40341101);c=ff(c,d,a,b,x[i+14],17,-1502002290);b=ff(b,c,d,a,x[i+15],22,1236535329);
+   a=gg(a,b,c,d,x[i+1],5,-165796510);d=gg(d,a,b,c,x[i+6],9,-1069501632);c=gg(c,d,a,b,x[i+11],14,643717713);b=gg(b,c,d,a,x[i],20,-373897302);
+   a=gg(a,b,c,d,x[i+5],5,-701558691);d=gg(d,a,b,c,x[i+10],9,38016083);c=gg(c,d,a,b,x[i+15],14,-660478335);b=gg(b,c,d,a,x[i+4],20,-405537848);
+   a=gg(a,b,c,d,x[i+9],5,568446438);d=gg(d,a,b,c,x[i+14],9,-1019803690);c=gg(c,d,a,b,x[i+3],14,-187363961);b=gg(b,c,d,a,x[i+8],20,1163531501);
+   a=gg(a,b,c,d,x[i+13],5,-1444681467);d=gg(d,a,b,c,x[i+2],9,-51403784);c=gg(c,d,a,b,x[i+7],14,1735328473);b=gg(b,c,d,a,x[i+12],20,-1926607734);
+   a=hh(a,b,c,d,x[i+5],4,-378558);d=hh(d,a,b,c,x[i+8],11,-2022574463);c=hh(c,d,a,b,x[i+11],16,1839030562);b=hh(b,c,d,a,x[i+14],23,-35309556);
+   a=hh(a,b,c,d,x[i+1],4,-1530992060);d=hh(d,a,b,c,x[i+4],11,1272893353);c=hh(c,d,a,b,x[i+7],16,-155497632);b=hh(b,c,d,a,x[i+10],23,-1094730640);
+   a=hh(a,b,c,d,x[i+13],4,681279174);d=hh(d,a,b,c,x[i],11,-358537222);c=hh(c,d,a,b,x[i+3],16,-722521979);b=hh(b,c,d,a,x[i+6],23,76029189);
+   a=hh(a,b,c,d,x[i+9],4,-640364487);d=hh(d,a,b,c,x[i+12],11,-421815835);c=hh(c,d,a,b,x[i+15],16,530742520);b=hh(b,c,d,a,x[i+2],23,-995338651);
+   a=ii(a,b,c,d,x[i],6,-198630844);d=ii(d,a,b,c,x[i+7],10,1126891415);c=ii(c,d,a,b,x[i+14],15,-1416354905);b=ii(b,c,d,a,x[i+5],21,-57434055);
+   a=ii(a,b,c,d,x[i+12],6,1700485571);d=ii(d,a,b,c,x[i+3],10,-1894986606);c=ii(c,d,a,b,x[i+10],15,-1051523);b=ii(b,c,d,a,x[i+1],21,-2054922799);
+   a=ii(a,b,c,d,x[i+8],6,1873313359);d=ii(d,a,b,c,x[i+15],10,-30611744);c=ii(c,d,a,b,x[i+6],15,-1560198380);b=ii(b,c,d,a,x[i+13],21,1309151649);
+   a=ii(a,b,c,d,x[i+4],6,-145523070);d=ii(d,a,b,c,x[i+11],10,-1120210379);c=ii(c,d,a,b,x[i+2],15,718787259);b=ii(b,c,d,a,x[i+9],21,-343485551);
+   a=sa(a,oa);b=sa(b,ob);c=sa(c,oc);d=sa(d,od);}
+  return[a,b,c,d];}
+ function b2l(by){var bin=[];for(var i=0;i<by.length*8;i+=8)bin[i>>5]|=(by[i/8]&0xFF)<<(i%32);return bin;}
+ function l2b(bl){var o=[];for(var i=0;i<bl.length*32;i+=8)o.push((bl[i>>5]>>>(i%32))&0xFF);return o;}
+ return function(byteArr){return l2b(core(b2l(byteArr),byteArr.length*8));};
+})();
+
+/* ---- UUID (dal firmware YiF) ---- */
+const SVC=0xFFF0, C_INFO=0xFFF1, C_AUTH=0xFFF4, C_KEY=0xFFF5, C_CFG=0xFFF6, C_NOTY=0xFFF7;
+const SVC_BATT=0x180F, C_BATT=0x2A19, SVC_ALERT=0x1802, C_ALERT=0x2A06;
+
+let device,server,svc,cInfo,cAuth,cCfg,cNoty,cKey,cBatt,cAlert;
+let notyWaiters=[], knownDevice=null;
+
+const $=s=>document.querySelector(s);
+const $$=s=>document.querySelectorAll(s);
+const logEl=$('#log');
+const hx=u=>[...u].map(x=>x.toString(16).padStart(2,'0').toUpperCase()).join(' ');
+function log(m,c='l-sys'){const d=new Date();const t=d.toLocaleTimeString('it-IT',{hour12:false})+'.'+String(d.getMilliseconds()).padStart(3,'0');
+  const e=document.createElement('div');e.className=c;e.textContent='['+t+'] '+m;logEl.appendChild(e);logEl.scrollTop=logEl.scrollHeight;}
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+function savePwd(v){try{localStorage.setItem('yif_pwd',v);}catch(e){}}
+function loadPwd(){try{const v=localStorage.getItem('yif_pwd');if(v)$('#pwd').value=v;}catch(e){}}
+
+function enableSet(cls,on){$$('.'+cls).forEach(b=>b.disabled=!on);}
+function setConn(on){$('#dotConn').className='dot'+(on?' on':'');$('#txtConn').textContent=on?(device?.name||'collegato'):'non collegato';
+  $('#btnDisconnect').disabled=!on;$('#btnConnect').disabled=on;enableSet('needconn',on);if(!on)setAuth(null);}
+function setAuth(st){const dot=$('#dotAuth'),txt=$('#txtAuth');
+  if(st===true){dot.className='dot on';txt.textContent='autenticato';}
+  else if(st===false){dot.className='dot warn';txt.textContent='password errata';}
+  else{dot.className='dot';txt.textContent='—';}
+  enableSet('needauth',st===true);}
+function setLock(state){const b=$('#lockBadge');
+  if(state==='lock'){b.className='lockbadge lk';b.textContent='CHIUSO 🔒';}
+  else if(state==='unlock'){b.className='lockbadge ul';b.textContent='APERTO 🔓';}
+  else{b.className='lockbadge unk';b.textContent='sconosciuto';}}
+
+if(!('bluetooth' in navigator)){
+  $('#compat').classList.remove('hidden');
+  $('#compat').innerHTML='<b>Questo browser non supporta il Bluetooth web.</b> Apri con Chrome o Edge (Bluetooth acceso).';
+  $('#btnConnect').disabled=true;
+}
+
+function onNotyFFF7(ev){
+  const v=new Uint8Array(ev.target.value.buffer);const code=v[0];
+  log('RX FFF7 : '+hx(v),'l-rx');
+  if(code===0)setLock('unlock');else if(code===1)setLock('lock');
+  notyWaiters=notyWaiters.filter(w=>{if(w.codes.includes(code)){w.resolve(code);return false;}return true;});
+}
+function onNotyFFF5(ev){log('RX FFF5 (tasto) : '+hx(new Uint8Array(ev.target.value.buffer)),'l-rx');}
+function waitNoty(codes,ms){return new Promise((resolve,reject)=>{
+  const w={codes};w.timer=setTimeout(()=>{notyWaiters=notyWaiters.filter(x=>x!==w);reject(new Error('timeout risposta'));},ms);
+  w.resolve=c=>{clearTimeout(w.timer);resolve(c);};notyWaiters.push(w);});}
+
+function parseInfo(dv){const b=new Uint8Array(dv.buffer);let i=0,out={raw:hx(b)};
+  while(i<b.length-1){const tag=b[i]>>4,len=b[i]&0x0f,val=b.slice(i+1,i+1+len);
+    if(tag===0&&len===2)out.hw=(val[0]<<8)|val[1];else if(tag===1&&len===6)out.mac=val;
+    else if(tag===3&&len===1)out.status=val[0];else if(tag===4&&len===4)out.random=val;
+    i+=1+len;}return out;}
+
+async function pickDevice(force){
+  if(!force&&knownDevice)return knownDevice;
+  return navigator.bluetooth.requestDevice({
+    filters:[{name:'YFZLCK2'},{namePrefix:'YFZ'}],optionalServices:[SVC,SVC_BATT,SVC_ALERT]
+  }).catch(()=>navigator.bluetooth.requestDevice({acceptAllDevices:true,optionalServices:[SVC,SVC_BATT,SVC_ALERT]}));
+}
+
+async function connect(force){
+  try{
+    device=await pickDevice(force);
+    if(!device){log('Nessun dispositivo scelto.','l-err');return;}
+    knownDevice=device;
+    device.addEventListener('gattserverdisconnected',()=>{log('Scollegato.','l-err');setConn(false);});
+    let ok=false;
+    for(let a=1;a<=4&&!ok;a++){try{log('Connessione… tentativo '+a);server=await device.gatt.connect();ok=true;}
+      catch(e){log('  tentativo '+a+' fallito: '+e.message,'l-err');await sleep(600);}}
+    if(!ok){log('Impossibile connettersi. Avvicina il lucchetto, spegni il Bluetooth del telefono un attimo o usa "Scegli un altro lucchetto".','l-err');return;}
+    log('Connesso.','l-ok');setConn(true);
+
+    svc=await server.getPrimaryService(SVC);
+    cInfo=await svc.getCharacteristic(C_INFO);cAuth=await svc.getCharacteristic(C_AUTH);
+    cCfg=await svc.getCharacteristic(C_CFG);cNoty=await svc.getCharacteristic(C_NOTY);
+    try{cKey=await svc.getCharacteristic(C_KEY);}catch(e){cKey=null;}
+    try{const bs=await server.getPrimaryService(SVC_BATT);cBatt=await bs.getCharacteristic(C_BATT);}catch(e){cBatt=null;}
+    try{const as=await server.getPrimaryService(SVC_ALERT);cAlert=await as.getCharacteristic(C_ALERT);}catch(e){cAlert=null;}
+
+    await cNoty.startNotifications();cNoty.addEventListener('characteristicvaluechanged',onNotyFFF7);
+    log('Notifiche FFF7 attive.','l-ok');
+    if(cKey){try{await cKey.startNotifications();cKey.addEventListener('characteristicvaluechanged',onNotyFFF5);}catch(e){}}
+
+    await readBattery();
+    await authenticate();   // <-- solo autenticazione: NON apre e NON chiude niente
+  }catch(e){log('Errore: '+e.message,'l-err');}
+}
+
+async function authenticate(){
+  try{
+    setAuth(null);
+    const info=parseInfo(await cInfo.readValue());
+    log('FFF1 info: '+info.raw,'l-sys');
+    if(!info.mac||!info.random){log('Info dispositivo incompleta.','l-err');return false;}
+    log('MAC='+hx(info.mac)+'  random='+hx(info.random)+'  hw='+(info.hw||'?'),'l-sys');
+    if(info.status!==undefined)setLock(info.status===0?'unlock':'lock');
+    const pwd=($('#pwd').value||'').trim();const pb=[...new TextEncoder().encode(pwd)];
+    if(pb.length!==6){log('La password deve essere di 6 caratteri.','l-err');setAuth(false);return false;}
+    const authVal=new Uint8Array([0x01,...MD5([...info.mac,...pb,...info.random])]);
+    log('TX FFF4 (auth) : '+hx(authVal),'l-tx');
+    const w=waitNoty([0x11,0x20,0x21],4000);
+    await cAuth.writeValueWithResponse(authVal);
+    const code=await w;
+    if(code===0x11){log('Autenticazione riuscita ✓ (la valigia resta com’è)','l-ok');setAuth(true);savePwd(pwd);return true;}
+    if(code===0x21){log('Autenticazione fallita: batteria troppo bassa.','l-err');setAuth(false);return false;}
+    log('Password errata (il lucchetto ha rifiutato).','l-err');setAuth(false);return false;
+  }catch(e){log('Auth non completata: '+e.message,'l-err');setAuth(false);return false;}
+}
+
+async function sendLock(lock){
+  try{const cmd=new Uint8Array([0x11,lock?0x01:0x02]);log('TX FFF6 ('+(lock?'chiudi':'apri')+') : '+hx(cmd),'l-tx');
+    const w=waitNoty([0x00,0x01,0x21,0x23],5000);await cCfg.writeValueWithResponse(cmd);const code=await w;
+    if(code===0x00){log('Lucchetto APERTO ✓','l-ok');setLock('unlock');}
+    else if(code===0x01){log('Lucchetto CHIUSO ✓','l-ok');setLock('lock');}
+    else if(code===0x21)log('Comando rifiutato: batteria bassa.','l-err');
+    else if(code===0x23)log('Timeout: il motore non ha completato (ostacolo meccanico?).','l-err');
+  }catch(e){log('Comando non completato: '+e.message,'l-err');}}
+
+async function ring(on){
+  if(!cAlert){log('Servizio suoneria non disponibile.','l-err');return;}
+  try{const v=new Uint8Array([on?0x02:0x00]);
+    if(cAlert.writeValueWithoutResponse)await cAlert.writeValueWithoutResponse(v);else await cAlert.writeValue(v);
+    log('TX Alert : '+hx(v)+(on?'  (suona)':'  (stop)'),'l-tx');}catch(e){log('Suoneria: '+e.message,'l-err');}}
+
+async function cfgWrite(bytes,desc){const cmd=new Uint8Array(bytes);log('TX FFF6 ('+desc+') : '+hx(cmd),'l-tx');
+  await cCfg.writeValueWithResponse(cmd);log(desc+': inviato ✓','l-ok');}
+async function setAutoLock(on){try{await cfgWrite([0x11,on?0x03:0x04],'blocco automatico '+(on?'ON':'OFF'));}catch(e){log('Errore: '+e.message,'l-err');}}
+async function setDisconnAlert(on){try{await cfgWrite([0x21,on?0x01:0x00],'avviso distanza '+(on?'ON':'OFF'));}catch(e){log('Errore: '+e.message,'l-err');}}
+async function setMos(code){const d=(code||'').trim();
+  if(!/^[1-5]{4}$/.test(d)){log('Codice MOS: 4 cifre, ognuna da 1 a 5 (= numero di click).','l-err');return;}
+  const n=d.split('').map(x=>x.charCodeAt(0)-48);
+  try{await cfgWrite([0x72,(n[0]<<4)|n[1],(n[2]<<4)|n[3]],'imposta MOS '+d);log('Codice MOS impostato: '+d+' — annotalo!','l-ok');}catch(e){log('Errore MOS: '+e.message,'l-err');}}
+async function offMos(){try{await cfgWrite([0x72,0x00,0x00],'disattiva MOS');log('Codice MOS disattivato.','l-ok');}catch(e){log('Errore: '+e.message,'l-err');}}
+async function changePassword(){
+  const oldp=($('#pwd').value||'').trim(), n1=($('#newpwd').value||'').trim(), n2=($('#newpwd2').value||'').trim();
+  if(oldp.length!==6){log('Devi essere autenticato con la password attuale (6 car.).','l-err');return;}
+  if(n1.length!==6){log('La nuova password deve essere di 6 caratteri.','l-err');return;}
+  if(n1!==n2){log('Le due nuove password non coincidono.','l-err');return;}
+  const o=[...new TextEncoder().encode(oldp)], nn=[...new TextEncoder().encode(n1)];
+  const body=[0x36];for(let i=0;i<6;i++)body.push(o[i]^nn[i]);
+  try{log('TX FFF6 (cambio password) : '+hx(new Uint8Array(body)),'l-tx');
+    const w=waitNoty([0x10],4000);await cCfg.writeValueWithResponse(new Uint8Array(body));await w;
+    log('Password cambiata ✓  Nuova: '+n1+' — ANNOTALA.','l-ok');$('#pwd').value=n1;savePwd(n1);$('#newpwd').value='';$('#newpwd2').value='';
+  }catch(e){log('Cambio password non confermato: '+e.message+' (prova a ri-autenticare con la nuova).','l-err');}}
+
+async function readBattery(){if(!cBatt){$('#txtBatt').textContent='n/d';return;}
+  try{const p=(await cBatt.readValue()).getUint8(0);$('#txtBatt').textContent=p+'%';log('Batteria: '+p+'%',p<20?'l-err':'l-ok');}
+  catch(e){$('#txtBatt').textContent='n/d';}}
+
+/* ---- ricollega al volo: dispositivi già autorizzati ---- */
+async function loadKnown(){
+  try{
+    if(navigator.bluetooth&&navigator.bluetooth.getDevices){
+      const ds=await navigator.bluetooth.getDevices();
+      knownDevice=ds.find(d=>(d.name||'').toUpperCase().startsWith('YFZ'))||ds[0]||null;
+      if(knownDevice){$('#btnConnect').textContent='Ricollega e autentica';$('#btnOther').classList.remove('hidden');
+        log('Lucchetto memorizzato: '+(knownDevice.name||knownDevice.id)+'. Premi Ricollega.','l-sys');}
+    }
+  }catch(e){}
+}
+
+/* ---- wiring ---- */
+$('#btnConnect').onclick=()=>connect(false);
+$('#btnOther').onclick=()=>connect(true);
+$('#btnDisconnect').onclick=()=>{if(device?.gatt.connected)device.gatt.disconnect();};
+$('#btnOpen').onclick=()=>sendLock(false);
+$('#btnClose').onclick=()=>sendLock(true);
+document.body.addEventListener('click',e=>{const b=e.target.closest('button[data-act]');if(!b)return;
+  switch(b.dataset.act){
+    case'ring':ring(true);break; case'stopring':ring(false);break;
+    case'autolock_on':setAutoLock(true);break; case'autolock_off':setAutoLock(false);break;
+    case'alert_on':setDisconnAlert(true);break; case'alert_off':setDisconnAlert(false);break;
+    case'mos_set':setMos($('#mos').value);break; case'mos_off':offMos();break;
+    case'chpwd':changePassword();break; case'batt':readBattery();break; case'reauth':authenticate();break;
+  }});
+$('#btnClear').onclick=()=>logEl.innerHTML='';
+$('#btnExport').onclick=()=>{const t=[...logEl.children].map(d=>d.textContent).join('\n');
+  const bl=new Blob([t],{type:'text/plain'});const a=document.createElement('a');a.href=URL.createObjectURL(bl);a.download='registro-controllo.txt';a.click();};
+
+loadPwd();
+loadKnown();
+log('Pronto. La valigia si apre solo col pulsante Apri.');
+
+/* ---- service worker (offline) ---- */
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(()=>{});});
+}
+</script>
+</body>
+</html>
